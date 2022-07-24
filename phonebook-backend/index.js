@@ -49,6 +49,43 @@ app.delete("/api/persons/:id", (request, response) => {
   response.status(204).end();
 });
 
+app.post("/api/persons", (request, response) => {
+  let person = request.body;
+
+  console.log("person", person);
+
+  if (Object.keys(person).length === 0) {
+    response.status(400).json({ error: "No data provided" });
+  }
+
+  if (person["name"] === undefined || person["name"] === "") {
+    response.status(400).json({ error: "Name is required" });
+  }
+
+  if (person["number"] === undefined || person["number"] === "") {
+    response.status(400).json({ error: "Number is required" });
+  }
+
+  const nameAlreadyExists = persons.filter(
+    (p) => p.name.toLowerCase() === person.name.toLowerCase()
+  );
+
+  if (nameAlreadyExists.length > 0) {
+    response.status(400).json({ error: "Name must be unique" });
+  }
+
+  console.log("person", person);
+
+  person = {
+    ...person,
+    id: Math.random().toString(),
+  };
+
+  persons.push(person);
+
+  response.json(person);
+});
+
 app.get("/info", (request, response) => {
   const noOfPersons = persons.length;
   const date = new Date();
