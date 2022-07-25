@@ -4,7 +4,12 @@ const morgan = require("morgan");
 const app = express();
 
 app.use(express.json());
-app.use(morgan("tiny"));
+morgan.token("type", function (req, res) {
+  return JSON.stringify(req.body);
+});
+app.use(
+  morgan(":method :url :status :res[content-length] - :response-time ms :type")
+);
 
 let persons = [
   {
@@ -15,7 +20,7 @@ let persons = [
   {
     id: 2,
     name: "Ada Lovelace",
-    number: "39-44-5323523",/12
+    number: "39-44-5323523",
   },
   {
     id: 3,
