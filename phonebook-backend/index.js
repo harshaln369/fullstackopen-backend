@@ -92,19 +92,28 @@ app.post("/api/persons", (request, response, next) => {
   //   response.status(400).json({ error: "Name must be unique" });
   // }
 
-  console.log("person", person);
-
   const newPerson = new Person({
     ...person,
   });
 
   newPerson
-    .save(person)
-    .then((newPerson) => {
-      response.json(newPerson);
+    .save()
+    .then((person) => {
+      response.send(person);
     })
     .catch((error) => {
       console.log("Not able to save new person", error);
+      next(error);
+    });
+});
+
+app.put("/api/persons/:id", (request, response, next) => {
+  const updateData = request.body;
+  Person.findByIdAndUpdate(request.params.id, updateData, { new: true })
+    .then((updatedPerson) => {
+      response.send(updatedPerson);
+    })
+    .catch((error) => {
       next(error);
     });
 });
