@@ -56,18 +56,18 @@ app.get("/api/persons/:id", (request, response) => {
   }
 });
 
-app.delete("/api/persons/:id", (request, response) => {
+app.delete("/api/persons/:id", (request, response, next) => {
   Person.findByIdAndRemove(request.params.id)
     .then((result) => {
       response.status(204).end();
     })
     .catch((error) => {
       console.log(error);
-      response.status(500).send({ error });
+      next(error);
     });
 });
 
-app.post("/api/persons", (request, response) => {
+app.post("/api/persons", (request, response, next) => {
   let person = request.body;
 
   console.log("person", person);
@@ -105,7 +105,7 @@ app.post("/api/persons", (request, response) => {
     })
     .catch((error) => {
       console.log("Not able to save new person", error);
-      response.status(500).json({ error });
+      next(error);
     });
 });
 
@@ -116,6 +116,18 @@ app.get("/info", (request, response) => {
     `<div><p>Phonebook has info for ${noOfPersons} people</p><p>${date}</p></div>`
   );
 });
+
+const errorHandler = (error, request, response, next) => {
+  console.log(error.message);
+
+  if (error.name === "Cast Error") {
+    return res.status(400).send({ error: "Malformatted id" });
+  }
+
+  next(error);
+};
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => console.log("listening on port: ", PORT));
