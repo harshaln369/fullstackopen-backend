@@ -80,24 +80,29 @@ app.post("/api/persons", (request, response) => {
     response.status(400).json({ error: "Number is required" });
   }
 
-  const nameAlreadyExists = persons.filter(
-    (p) => p.name.toLowerCase() === person.name.toLowerCase()
-  );
+  // const nameAlreadyExists = persons.filter(
+  //   (p) => p.name.toLowerCase() === person.name.toLowerCase()
+  // );
 
-  if (nameAlreadyExists.length > 0) {
-    response.status(400).json({ error: "Name must be unique" });
-  }
+  // if (nameAlreadyExists.length > 0) {
+  //   response.status(400).json({ error: "Name must be unique" });
+  // }
 
   console.log("person", person);
 
-  person = {
+  const newPerson = new Person({
     ...person,
-    id: Math.random().toString(),
-  };
+  });
 
-  persons.push(person);
-
-  response.json(person);
+  newPerson
+    .save(person)
+    .then((newPerson) => {
+      response.json(newPerson);
+    })
+    .catch((error) => {
+      console.log("Not able to save new person", error);
+      response.status(500).json({ error });
+    });
 });
 
 app.get("/info", (request, response) => {
