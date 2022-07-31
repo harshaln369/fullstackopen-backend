@@ -46,14 +46,16 @@ app.get("/api/persons", (request, response) => {
 });
 
 app.get("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
-  const person = persons.find((person) => person.id === id);
+  const id = request.params.id;
 
-  if (person) {
-    response.json(person);
-  } else {
-    response.status(404).end();
-  }
+  Person.findById(id)
+    .then((person) => {
+      response.json(person);
+    })
+    .catch((error) => {
+      console.log(error);
+      next(error);
+    });
 });
 
 app.delete("/api/persons/:id", (request, response, next) => {
@@ -119,11 +121,19 @@ app.put("/api/persons/:id", (request, response, next) => {
 });
 
 app.get("/info", (request, response) => {
-  const noOfPersons = persons.length;
-  const date = new Date();
-  response.send(
-    `<div><p>Phonebook has info for ${noOfPersons} people</p><p>${date}</p></div>`
-  );
+  Person.find()
+    .countDocuments()
+    .then((count) => {
+      const noOfPersons = count;
+      const date = new Date();
+      response.send(
+        `<div><p>Phonebook has info for ${noOfPersons} people</p><p>${date}</p></div>`
+      );
+    })
+    .catch((error) => {
+      console.log(error);
+      next(error);
+    });
 });
 
 const errorHandler = (error, request, response, next) => {
