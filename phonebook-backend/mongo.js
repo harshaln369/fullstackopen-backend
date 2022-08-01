@@ -1,49 +1,51 @@
-const mongoose = require("mongoose");
+/* eslint-disable no-undef */
+const mongoose = require('mongoose')
 
+// eslint-disable-next-line no-undef
 if (process.argv.length < 3) {
   console.log(
-    "Please provide the password as an argument: node mongo.js <password>"
-  );
-  process.exit(1);
+    'Please provide the password as an argument: node mongo.js <password>'
+  )
+  process.exit(1)
 }
 
-const password = process.argv[2];
+const password = process.argv[2]
 
-const url = `mongodb+srv://harshal:${password}@cluster0.oxj4nkh.mongodb.net/phonebook?retryWrites=true&w=majority`;
+const url = `mongodb+srv://harshal:${password}@cluster0.oxj4nkh.mongodb.net/phonebook?retryWrites=true&w=majority`
 
 const personSchema = new mongoose.Schema({
   name: String,
   number: String,
-});
+})
 
-const Person = mongoose.model("Person", personSchema);
+const Person = mongoose.model('Person', personSchema)
 
 if (process.argv.length <= 3) {
   mongoose
     .connect(url)
-    .then((result) => {
-      console.log("Connected to MongoDB");
+    .then(() => {
+      console.log('Connected to MongoDB')
 
-      return Person.find({});
+      return Person.find({})
     })
     .then((people) => {
-      let peopleString = "";
+      let peopleString = ''
       const str = people.reduce((prevPerson, currPerson) => {
-        if (prevPerson === "") {
-          return (peopleString += `phonebook:\n${currPerson.name} ${currPerson.number}\n`);
+        if (prevPerson === '') {
+          return (peopleString += `phonebook:\n${currPerson.name} ${currPerson.number}\n`)
         } else {
-          return (peopleString += `${currPerson.name} ${currPerson.number}\n`);
+          return (peopleString += `${currPerson.name} ${currPerson.number}\n`)
         }
-      }, "");
-      console.log(str);
-      return mongoose.connection.close();
+      }, '')
+      console.log(str)
+      return mongoose.connection.close()
     })
-    .catch((err) => console.log(err));
+    .catch((err) => console.log(err))
 } else {
   mongoose
     .connect(url)
-    .then((result) => {
-      console.log("Connected to MongoDB");
+    .then(() => {
+      console.log('Connected to MongoDB')
 
       if (
         process.argv[3] &&
@@ -54,20 +56,20 @@ if (process.argv.length <= 3) {
         const person = new Person({
           name: process.argv[3],
           number: process.argv[4],
-        });
+        })
 
-        return person.save();
+        return person.save()
       } else {
         throw new Error(
-          "Please provide the name and number as an argument: node mongo.js <password> <name> <number>"
-        );
+          'Please provide the name and number as an argument: node mongo.js <password> <name> <number>'
+        )
       }
     })
     .then(() => {
       console.log(
         `added ${process.argv[3]} number ${process.argv[4]} to phonebook`
-      );
-      return mongoose.connection.close();
+      )
+      return mongoose.connection.close()
     })
-    .catch((err) => console.log(err));
+    .catch((err) => console.log(err))
 }
