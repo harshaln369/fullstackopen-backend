@@ -74,17 +74,17 @@ app.post("/api/persons", (request, response, next) => {
 
   console.log("person", person);
 
-  if (Object.keys(person).length === 0) {
-    response.status(400).json({ error: "No data provided" });
-  }
+  // if (Object.keys(person).length === 0) {
+  //   response.status(400).json({ error: "No data provided" });
+  // }
 
-  if (person["name"] === undefined || person["name"] === "") {
-    response.status(400).json({ error: "Name is required" });
-  }
+  // if (person["name"] === undefined || person["name"] === "") {
+  //   response.status(400).json({ error: "Name is required" });
+  // }
 
-  if (person["number"] === undefined || person["number"] === "") {
-    response.status(400).json({ error: "Number is required" });
-  }
+  // if (person["number"] === undefined || person["number"] === "") {
+  //   response.status(400).json({ error: "Number is required" });
+  // }
 
   // const nameAlreadyExists = persons.filter(
   //   (p) => p.name.toLowerCase() === person.name.toLowerCase()
@@ -111,7 +111,11 @@ app.post("/api/persons", (request, response, next) => {
 
 app.put("/api/persons/:id", (request, response, next) => {
   const updateData = request.body;
-  Person.findByIdAndUpdate(request.params.id, updateData, { new: true })
+  Person.findByIdAndUpdate(request.params.id, updateData, {
+    new: true,
+    runValidators: true,
+    context: "query",
+  })
     .then((updatedPerson) => {
       response.send(updatedPerson);
     })
@@ -139,8 +143,12 @@ app.get("/info", (request, response) => {
 const errorHandler = (error, request, response, next) => {
   console.log(error.message);
 
-  if (error.name === "Cast Error") {
-    return res.status(400).send({ error: "Malformatted id" });
+  if (error.name === "CastError") {
+    return response.status(400).json({ error: "Malformatted id" });
+  }
+
+  if (error.name === "ValidationError") {
+    return response.status(400).json({ error: error.message });
   }
 
   next(error);
