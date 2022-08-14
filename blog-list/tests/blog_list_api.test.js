@@ -22,5 +22,26 @@ describe('returns correct amount of blogs', () => {
     const response = await api.get('/api/blogs')
 
     response.body.forEach((data) => expect(data.id).toBeDefined())
-  })
+  }, 10000)
+
+  test('new blog saved to db', async () => {
+    const newBlog = {
+      title: 'My Test Blog',
+      author: 'harshal',
+      url: 'http://some-dummy-url.com',
+      likes: 10,
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
+
+    const contents = blogsAtEnd.map((blog) => blog.title)
+    expect(contents).toContain('My Test Blog')
+  }, 10000)
 })
