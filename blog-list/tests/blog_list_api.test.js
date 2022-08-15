@@ -1,3 +1,4 @@
+const mongoose = require('mongoose')
 const supertest = require('supertest')
 
 const Blog = require('../models/blog')
@@ -10,7 +11,7 @@ describe('returns correct amount of blogs', () => {
   beforeEach(async () => {
     await Blog.deleteMany({})
     await Blog.insertMany(helper.initialBlogs)
-  })
+  }, 10000)
 
   test('returns correct amount of blog posts', async () => {
     const response = await api.get('/api/blogs')
@@ -44,4 +45,35 @@ describe('returns correct amount of blogs', () => {
     const contents = blogsAtEnd.map((blog) => blog.title)
     expect(contents).toContain('My Test Blog')
   }, 10000)
+
+  test('if likes missing then default must be 0', async () => {
+    const newBlog = {
+      title: 'My Test Blog',
+      author: 'harshal',
+      url: 'http://some-dummy-url.com',
+    }
+
+    await api.post('/api/blogs').send(newBlog)
+
+    const blogsAtEnd = await helper.blogsInDb()
+
+    expect(blogsAtEnd[blogsAtEnd.length - 1].likes).toBe(0)
+  }, 10000)
+
+  test('if title and url missing respond with 400', async () => {
+    const newBlog = {
+      title: 'My Test Blog',
+      author: 'harshal',
+    }
+
+    await api.post('/api/blogs').send(newBlog).expect(400)
+
+    const blogsAtEnd = await helper.blogsInDb()
+
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
+  }, 10000)
+})
+
+afterAll(() => {
+  mongoose.connection.close()
 })
