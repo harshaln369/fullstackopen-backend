@@ -72,6 +72,41 @@ describe('returns correct amount of blogs', () => {
 
     expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
   }, 10000)
+
+  test('delete with status code 204 if id is valid', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToDelete = blogsAtStart[0]
+
+    await api.delete(`/api/notes/${blogToDelete.id}`).expect(204)
+
+    const blogsAtEnd = await helper.blogsInDb()
+
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length - 1)
+
+    // const contents = blogsAtEnd.map((r) => r.title)
+
+    // expect(contents).not.toContain(blogToDelete.title)
+  })
+
+  test('update if id is valid', async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    let blogToUpdate = blogsAtStart[0]
+
+    blogToUpdate = {
+      ...blogsAtStart[0],
+      title: 'updated title',
+    }
+
+    await api.put(`/api/notes/${blogToUpdate.id}`).send(blogToUpdate)
+
+    const blogsAtEnd = await helper.blogsInDb()
+
+    expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
+
+    const contents = blogsAtEnd.map((r) => r.title)
+
+    expect(contents).toContain(blogToUpdate.title)
+  })
 })
 
 afterAll(() => {
