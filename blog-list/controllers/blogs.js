@@ -1,7 +1,6 @@
 const blogsRouter = require('express').Router()
 
 const Blog = require('../models/blog')
-const User = require('../models/user')
 
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user')
@@ -11,10 +10,10 @@ blogsRouter.get('/', async (request, response) => {
 blogsRouter.post('/', async (request, response) => {
   const body = request.body
 
-  const userId = request.user
-  let user
-  if (userId) {
-    user = await User.findById(userId)
+  const user = request.user
+
+  if (!user) {
+    response.status(401).json({ error: 'Not authorized' })
   }
 
   const newBlog = {
@@ -33,6 +32,12 @@ blogsRouter.post('/', async (request, response) => {
 })
 
 blogsRouter.delete('/:id', async (request, response) => {
+  const user = request.user
+
+  if (!user) {
+    response.status(401).json({ error: 'Not authorized' })
+  }
+
   await Blog.findByIdAndRemove(request.params.id)
   response.status(204).end()
 })
